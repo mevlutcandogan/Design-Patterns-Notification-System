@@ -1,16 +1,16 @@
 public class NotificationManager {
     public void sendNotification(String type, String message, String recipient) {
         if (type.equalsIgnoreCase("EMAIL")) {
-            System.out.println("SMTP sunucusuna bağlanılıyor...");
-            System.out.println("E-posta gönderiliyor -> Alıcı: " + recipient + " | Mesaj: " + message);
+            System.out.println("Mail sunucusuna baglaniliyor...");
+            System.out.println("Mail gonderildi - Kime: " + recipient + " Icerik: " + message);
         } else if (type.equalsIgnoreCase("SMS")) {
-            System.out.println("Operatör SMS Gateway'ine bağlanılıyor...");
-            System.out.println("SMS gönderiliyor -> Alıcı: " + recipient + " | Mesaj: " + message);
+            System.out.println("SMS servisine istek atiliyor...");
+            System.out.println("SMS iletildi -> Tel: " + recipient + " Mesaj: " + message);
         } else if (type.equalsIgnoreCase("PUSH")) {
-            System.out.println("Apple/Google bildirim sunucularına bağlanılıyor...");
-            System.out.println("Push Notification gönderiliyor -> Cihaz: " + recipient + " | Mesaj: " + message);
+            System.out.println("Push sunucusuna baglanildi...");
+            System.out.println("Telefona bildirim dustu -> " + recipient + " : " + message);
         } else {
-            System.out.println("HATA: Bilinmeyen bildirim tipi!");
+            System.out.println("HATA: Boyle bir bildirim tipi yok!");
         }
     }
 }
