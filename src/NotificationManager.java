@@ -1,16 +1,50 @@
-public class NotificationManager {
-    public void sendNotification(String type, String message, String recipient) {
-        if (type.equalsIgnoreCase("EMAIL")) {
-            System.out.println("Mail sunucusuna baglaniliyor...");
-            System.out.println("Mail gonderildi - Kime: " + recipient + " Icerik: " + message);
-        } else if (type.equalsIgnoreCase("SMS")) {
-            System.out.println("SMS servisine istek atiliyor...");
-            System.out.println("SMS iletildi -> Tel: " + recipient + " Mesaj: " + message);
-        } else if (type.equalsIgnoreCase("PUSH")) {
-            System.out.println("Push sunucusuna baglanildi...");
-            System.out.println("Telefona bildirim dustu -> " + recipient + " : " + message);
-        } else {
-            System.out.println("HATA: Boyle bir bildirim tipi yok!");
+public interface Notification {
+    void send(String message);
+}
+public class EmailNotification implements Notification {
+    public void send(String message) {
+        System.out.println("E-posta gönderiliyor: " + message);
+    }
+}
+
+public class SMSNotification implements Notification {
+    public void send(String message) {
+        System.out.println("SMS gönderiliyor: " + message);
+    }
+}
+
+public class PushNotification implements Notification {
+    public void send(String message) {
+        System.out.println("Push bildirimi gönderiliyor: " + message);
+    }
+}
+public class NotificationFactory {
+    public Notification createNotification(String type) {
+        if (type == null) {
+            return null;
         }
+        
+        switch (type.toLowerCase()) {
+            case "email":
+                return new EmailNotification();
+            case "sms":
+                return new SMSNotification();
+            case "push":
+                return new PushNotification();
+            default:
+                throw new IllegalArgumentException("Bilinmeyen bildirim tipi: " + type);
+        }
+    }
+}
+
+public class NotificationManager {
+    public static void main(String[] args) {
+        NotificationFactory factory = new NotificationFactory();
+        
+        Notification email = factory.createNotification("email");
+        email.send("email mesaj");
+
+        Notification sms = factory.createNotification("sms");
+        sms.send("SMS mesaj");
     }
 }
