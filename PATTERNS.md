@@ -1,18 +1,12 @@
-# Projede Kullanılan Tasarım Örüntüleri
-
-## 1. Factory Method (Yaratımsal / Creational) - Faz 1
+## 2. Decorator (Yapısal / Structural) - Faz 2
 
 **Çözülen Problem:**
-Projenin başlangıcında tüm bildirim tipleri (`Email`, `SMS`, `Push`) tek bir sınıf içinde karmaşık `if-else` bloklarıyla yönetiliyordu. Bu durum yeni bir bildirim tipi eklemeyi zorlaştırıyor ve kodu bakımı imkansız bir "spagetti" yapıya dönüştürüyordu.
+Sisteme loglama gibi yeni özellikler eklemek istediğimizde, mevcut bildirim sınıflarının (`EmailNotification`, vb.) kodlarına müdahale etmemiz gerekiyordu. Bu durum hem OCP (Açık/Kapalı Prensibi) ihlaline yol açıyor hem de özellikleri kalıtım (inheritance) ile eklemeye kalktığımızda "Sınıf Patlaması" (Class Explosion) riskini doğuruyordu.
 
 **Nasıl Uygulandı:**
-Nesne yaratma sorumluluğu, istemci sınıftan alınarak `NotificationFactory` sınıfına devredildi. 
-- **Notification (Interface):** Tüm bildirimlerin uyması gereken standart bir sözleşme oluşturuldu.
-- **Somut Sınıflar:** Her bildirim tipi (`EmailNotification`, `SMSNotification` vb.) bu arayüzü implemente ederek kendi gönderim mantığını kurdu.
-- **NotificationFactory:** Gelen isteğe göre doğru nesneyi üretip döndüren merkezi fabrika birimi oluşturuldu.
+Kalıtım yerine kompozisyon (composition) tercih edildi. Mevcut sınıflara dokunmamak için `NotificationDecorator` adında soyut bir sarmalayıcı (wrapper) sınıf oluşturuldu. Somut süsleyici olan `LoggingDecorator`, asıl bildirimin gönderilme aşamasından önce ve sonra araya girerek orijinal nesneyi bozmadan loglama işlemini başarıyla gerçekleştirdi.
 
 **UML Sınıf Diyagramı:**
-
 ```mermaid
 classDiagram
     class Notification {
@@ -22,17 +16,16 @@ classDiagram
     class EmailNotification {
         +send(message: String)
     }
-    class SMSNotification {
+    class NotificationDecorator {
+        <<abstract>>
+        #wrappedNotification: Notification
         +send(message: String)
     }
-    class PushNotification {
+    class LoggingDecorator {
         +send(message: String)
-    }
-    class NotificationFactory {
-        +createNotification(type: String) Notification
     }
     
     Notification <|.. EmailNotification
-    Notification <|.. SMSNotification
-    Notification <|.. PushNotification
-    NotificationFactory ..> Notification : Üretir
+    Notification <|.. NotificationDecorator
+    NotificationDecorator o-- Notification : sarmalar
+    NotificationDecorator <|-- LoggingDecorator
