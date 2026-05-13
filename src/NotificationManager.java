@@ -1,50 +1,80 @@
-public interface Notification {
+interface Notification {
     void send(String message);
 }
-public class EmailNotification implements Notification {
+
+class EmailNotification implements Notification {
     public void send(String message) {
         System.out.println("E-posta gönderiliyor: " + message);
     }
 }
 
-public class SMSNotification implements Notification {
+class SMSNotification implements Notification {
     public void send(String message) {
         System.out.println("SMS gönderiliyor: " + message);
     }
 }
 
-public class PushNotification implements Notification {
+class PushNotification implements Notification {
     public void send(String message) {
         System.out.println("Push bildirimi gönderiliyor: " + message);
     }
 }
-public class NotificationFactory {
+
+class NotificationFactory {
     public Notification createNotification(String type) {
         if (type == null) {
             return null;
         }
-        
         switch (type.toLowerCase()) {
-            case "email":
-                return new EmailNotification();
-            case "sms":
-                return new SMSNotification();
-            case "push":
-                return new PushNotification();
-            default:
-                throw new IllegalArgumentException("Bilinmeyen bildirim tipi: " + type);
+            case "email": return new EmailNotification();
+            case "sms": return new SMSNotification();
+            case "push": return new PushNotification();
+            default: throw new IllegalArgumentException("Bilinmeyen bildirim tipi: " + type);
         }
     }
 }
+abstract class NotificationDecorator implements Notification {
+    protected Notification wrappedNotification;
 
+    public NotificationDecorator(Notification wrappedNotification) {
+        this.wrappedNotification = wrappedNotification;
+    }
+
+    public void send(String message) {
+        wrappedNotification.send(message);
+    }
+}
+
+class LoggingDecorator extends NotificationDecorator {
+    public LoggingDecorator(Notification wrappedNotification) {
+        super(wrappedNotification);
+    }
+
+    public void send(String message) {
+        System.out.println("[SİSTEM LOGU] Bildirim süreci başlatıldı...");
+        super.send(message); 
+    }
+}
+class NotificationFacade {
+    private NotificationFactory factory = new NotificationFactory();
+
+    public void sendLoggedNotification(String type, String message) {
+        
+        Notification notif = factory.createNotification(type);
+        if (notif != null) {
+            Notification loggedNotif = new LoggingDecorator(notif);
+            loggedNotif.send(message);
+        }
+    }
+}
 public class NotificationManager {
     public static void main(String[] args) {
-        NotificationFactory factory = new NotificationFactory();
-        
-        Notification email = factory.createNotification("email");
-        email.send("email mesaj");
+        NotificationFacade facade = new NotificationFacade();
 
-        Notification sms = factory.createNotification("sms");
-        sms.send("SMS mesaj");
+        System.out.println("--- Test 1: E-posta Gönderimi ---");
+        facade.sendLoggedNotification("email", "Sistem başarıyla güncellendi.");
+
+        System.out.println("\n--- Test 2: SMS Gönderimi ---");
+        facade.sendLoggedNotification("sms", "Bakiye yetersiz.");
     }
 }
