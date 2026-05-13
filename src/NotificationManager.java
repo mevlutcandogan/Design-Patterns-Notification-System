@@ -1,24 +1,26 @@
 public interface Notification {
     void send(String message);
 }
-public class EmailNotification implements Notification {
+
+class EmailNotification implements Notification {
     public void send(String message) {
         System.out.println("E-posta gönderiliyor: " + message);
     }
 }
 
-public class SMSNotification implements Notification {
+class SMSNotification implements Notification {
     public void send(String message) {
         System.out.println("SMS gönderiliyor: " + message);
     }
 }
 
-public class PushNotification implements Notification {
+class PushNotification implements Notification {
     public void send(String message) {
         System.out.println("Push bildirimi gönderiliyor: " + message);
     }
 }
-public class NotificationFactory {
+
+class NotificationFactory {
     public Notification createNotification(String type) {
         if (type == null) {
             return null;
@@ -37,14 +39,40 @@ public class NotificationFactory {
     }
 }
 
+abstract class NotificationDecorator implements Notification {
+    protected Notification wrappedNotification;
+
+    public NotificationDecorator(Notification wrappedNotification) {
+        this.wrappedNotification = wrappedNotification;
+    }
+
+    public void send(String message) {
+        wrappedNotification.send(message);
+    }
+}
+
+class LoggingDecorator extends NotificationDecorator {
+    public LoggingDecorator(Notification wrappedNotification) {
+        super(wrappedNotification);
+    }
+
+    public void send(String message) {
+        System.out.println("[SİSTEM LOGU] Bildirim işlemi başlatıldı...");
+        super.send(message);
+        System.out.println("[SİSTEM LOGU] Bildirim başarıyla tamamlandı.\n");
+    }
+}
+
 public class NotificationManager {
     public static void main(String[] args) {
         NotificationFactory factory = new NotificationFactory();
         
+        System.out.println("--- NORMAL BİLDİRİM ---");
         Notification email = factory.createNotification("email");
         email.send("email mesaj");
-
+        System.out.println("--- LOGLANMIŞ BİLDİRİM ---");
         Notification sms = factory.createNotification("sms");
-        sms.send("SMS mesaj");
+        Notification logluSms = new LoggingDecorator(sms); 
+        logluSms.send("sms mesaj");
     }
 }
